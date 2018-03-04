@@ -1,0 +1,33 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: page_disabler 0.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2018-03-04T18:44:00+01:00\n"
+"PO-Revision-Date: 2018-03-04T18:44:01+01:00\n"
+"Language: it_IT\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: packages/page_disabler/controller.php:61
+msgid "Page Disabler"
+msgstr "Disabilitatore di pagine"
+
+#: packages/page_disabler/controller.php:71
+msgid "Disable or enable pages with the site map context menu."
+msgstr "Abilita o disabilita pagine tramite il menu contestuale della mappa del sito."
+
+#: packages/page_disabler/controller.php:89
+msgid "Enable"
+msgstr "Abilita"
+
+#: packages/page_disabler/controller.php:90
+msgid "Disable"
+msgstr "Disabilita"
+
+#: packages/page_disabler/controllers/backend/page_disabler.php:15
+msgid "Access Denied"
+msgstr "Accesso negato"

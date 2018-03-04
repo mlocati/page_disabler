@@ -1,0 +1,14 @@
+{
+	"name": "mlocati-concrete5-packages/page_disabler",
+	"description": "Allow publish/unpublish pages with 1 click in the dashboard site map",
+	"type": "concrete5-package",
+	"license": "MIT",
+	"minimum-stability": "stable",
+	"authors": [{
+			"name": "Michele Locati",
+			"email": "michele@locati.it",
+			"homepage": "https://mlocati.github.io",
+			"role": "Author"
+		}
+	]
+}
