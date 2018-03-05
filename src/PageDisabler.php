@@ -125,19 +125,6 @@ class PageDisabler
             $pk = $this->getViewPageKey();
             $pk->setPermissionObject($page);
             $accessibleGroups = array();
-            $pao = $pk->getPermissionAccessObject();
-            $assignments = $pao ? $pao->getAccessListItems() : array();
-            /* @var \Concrete\Core\Permission\Access\ListItem\PageListItem[] $assignments */
-            foreach ($assignments as $assignment) {
-                $ae = $assignment->getAccessEntityObject();
-                if ($ae->getAccessEntityTypeHandle() == 'group') {
-                    /* \Concrete\Core\Permission\Access\Entity\GroupEntity $ae */
-                    $group = $ae->getGroupObject();
-                    if (is_object($group) && $group->getGroupID() == GUEST_GROUP_ID) {
-                        break;
-                    }
-                }
-            }
             if ($accessible) {
                 $accessibleGroups[GUEST_GROUP_ID] = \Group::getByID(GUEST_GROUP_ID);
             } else {
