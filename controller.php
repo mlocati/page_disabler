@@ -1,13 +1,16 @@
 <?php
 namespace Concrete\Package\PageDisabler;
 
+use Concrete\Core\Asset\Asset;
+use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Http\Request;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Routing\RouterInterface;
 use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
+use Concrete\Core\View\View;
 use Concrete\Package\PageDisabler\Controller\Backend\PageDisabler;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -26,7 +29,7 @@ class Controller extends Package
      *
      * @var string
      */
-    protected $pkgVersion = '0.0.2';
+    protected $pkgVersion = '0.0.3';
 
     /**
      * {@inheritdoc}
@@ -40,9 +43,9 @@ class Controller extends Package
      *
      * @see \Concrete\Core\Package\Package::$pkgAutoloaderRegistries
      */
-    protected $pkgAutoloaderRegistries = [
-        'src' => 'Concrete\Package\PageDisabler'
-    ];
+    protected $pkgAutoloaderRegistries = array(
+        'src' => 'Concrete\Package\PageDisabler',
+    );
 
     /**
      * {@inheritdoc}
@@ -74,13 +77,14 @@ class Controller extends Package
     public function on_start()
     {
         $app = isset($this->app) ? $this->app : Application::getFacadeApplication();
-        if (! $app->isRunThroughCommandLineInterface()) {
-            $this->registerServiceProvider($app);
-            $this->registerRoutes($app);
+        $this->registerServiceProvider($app);
+        $this->registerRoutes($app);
+        $this->registerAssets($app);
+        $dispatcher = $app->make('director');
+        $dispatcher->addListener('on_before_render', function (GenericEvent $e) use ($app) {
             $request = Request::getInstance();
             switch ($request->getPathInfo()) {
                 case '/dashboard/sitemap/full':
-                    $dispatcher = $app->make('director');
                     $resolver = $app->make(ResolverManagerInterface::class);
                     $token = $app->make('token');
                     $assetUrl = $this->getRelativePath() . '/js/dashboard/sitemap.js?' . $this->pkgVersion;
@@ -98,22 +102,12 @@ class Controller extends Package
                             )
                         )
                     ));
-                    $inject = <<<EOT
-<script>
-window.PageDisablerSitemapData = {$dynamicData};
-</script>
-<script src="{$assetUrl}"></script>
-
-EOT
-;
-                    $dispatcher->addListener('on_page_output', function (GenericEvent $e) use ($inject) {
-                        $contents = $e->getArgument('contents');
-                        $contents = preg_replace('/<\/body>/i', $inject . '$0', $contents);
-                        $e->setArgument('contents', $contents);
-                    });
+                    $view = View::getRequestInstance();
+                    $view->addFooterAsset("<script>window.PageDisablerSitemapData = {$dynamicData};</script>");
+                    $view->requireAsset('page_disabler/dashboard/sitemap');
                     break;
             }
-        }
+        });
     }
 
     protected function registerServiceProvider(\Concrete\Core\Application\Application $app)
@@ -129,5 +123,22 @@ EOT
                 PageDisabler::class . '::setEnabled'
             )
         ));
+    }
+
+    protected function registerAssets(\Concrete\Core\Application\Application $app)
+    {
+        $al = AssetList::getInstance();
+        $al->registerMultiple([
+            'page_disabler/dashboard/sitemap' => [
+                ['javascript', 'js/dashboard/sitemap.js', ['minify' => true, 'combine' => true, 'position' => Asset::ASSET_POSITION_FOOTER], $this],
+            ],
+        ]);
+        $al->registerGroupMultiple([
+            'page_disabler/dashboard/sitemap' => [
+                [
+                    ['javascript', 'page_disabler/dashboard/sitemap'],
+                ],
+            ],
+        ]);
     }
 }
