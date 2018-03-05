@@ -44,6 +44,7 @@ class PageDisabler
     /**
      * @param Page $page
      * @param bool $accessible
+     * @throws Exception
      */
     public function setAccessibleByGuest(Page $page, $accessible)
     {
@@ -128,7 +129,6 @@ class PageDisabler
                     /* \Concrete\Core\Permission\Access\Entity\GroupEntity $ae */
                     $group = $ae->getGroupObject();
                     if (is_object($group) && $group->getGroupID() == GUEST_GROUP_ID) {
-                        $result = true;
                         break;
                     }
                 }
@@ -154,6 +154,7 @@ class PageDisabler
     /**
      * @param Page $page
      * @param bool $accessible
+     * @throws Exception
      */
     protected function setAccessibleByGuest_Advanced(Page $page, $accessible)
     {

@@ -3,7 +3,6 @@
 namespace Concrete\Package\PageDisabler;
 
 use Concrete\Core\Foundation\Service\Provider;
-
 use Concrete\Core\Application\Service\Dashboard\Sitemap as CoreSitemap;
 use Concrete\Package\PageDisabler\Application\Service\Dashboard\Sitemap;
 
