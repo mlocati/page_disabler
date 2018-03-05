@@ -87,7 +87,6 @@ class Controller extends Package
                 case '/dashboard/sitemap/full':
                     $resolver = $app->make(ResolverManagerInterface::class);
                     $token = $app->make('token');
-                    $assetUrl = $this->getRelativePath() . '/js/dashboard/sitemap.js?' . $this->pkgVersion;
                     $dynamicData = json_encode(array(
                         'i18n' => array(
                             'Enable' => t('Enable'),
