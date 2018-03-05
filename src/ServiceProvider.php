@@ -2,8 +2,10 @@
 
 namespace Concrete\Package\PageDisabler;
 
-use Concrete\Core\Foundation\Service\Provider;
+use Concrete\Core\Application\Application;
 use Concrete\Core\Application\Service\Dashboard\Sitemap as CoreSitemap;
+use Concrete\Core\Foundation\Service\Provider;
+use Concrete\Core\Package\Package;
 use Concrete\Package\PageDisabler\Application\Service\Dashboard\Sitemap;
 
 /**
@@ -15,6 +17,12 @@ class ServiceProvider extends Provider
 {
     public function register()
     {
+        $this->app->singleton('page_disabler/config', function (Application $app) {
+            $pkg = Package::getByHandle('page_disabler');
+
+            return $pkg->getFileConfig();
+        });
+
         $this->app->singleton(PageDisabler::class);
 
         $this->app->offsetUnset('helper/concrete/dashboard/sitemap');

@@ -1,6 +1,7 @@
 <?php
 namespace Concrete\Package\PageDisabler;
 
+use Concrete\Core\Application\Application;
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Permission\Access\Access;
@@ -12,13 +13,16 @@ class PageDisabler
 {
 
     /**
-     *
      * @var Repository
      */
     protected $config;
 
     /**
-     *
+     * @var Repository
+     */
+    protected $packageConfig;
+
+    /**
      * @var PageKey|null
      */
     protected $viewPageKey;
@@ -26,8 +30,9 @@ class PageDisabler
     /**
      * @param Repository $config
      */
-    public function __construct(Repository $config)
+    public function __construct(Application $app, Repository $config)
     {
+        $this->packageConfig = $app->make('page_disabler/config');
         $this->config = $config;
     }
 
@@ -138,7 +143,11 @@ class PageDisabler
             } else {
                 unset($accessibleGroups[GUEST_GROUP_ID]);
                 if (empty($accessibleGroups)) {
-                    $accessibleGroups[ADMIN_GROUP_ID] = \Group::getByID(ADMIN_GROUP_ID);
+                    $gID = (int) $this->packageConfig->get('access.ensure_user_group');
+                    if ($gID === 0) {
+                        $gID = ADMIN_GROUP_ID;
+                    }
+                    $accessibleGroups[$gID] = \Group::getByID($gID);
                 }
             }
             $pa = Access::create($pk);
