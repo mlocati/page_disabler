@@ -31,6 +31,7 @@ class Sitemap extends CoreSitemap
 			    $isAccessibleByGuest = $pd->isAccessibleByGuest($page);
 			    if ($isAccessibleByGuest !== null) {
 			        $node->accessibleByGuest = $isAccessibleByGuest;
+			        $node->inheritPermissionsFromParent = $page->getCollectionInheritance() === 'PARENT';
 			        if (isset($node->iconClass) && $isAccessibleByGuest === false) {
         		        $node->iconClass = $this->getDisabledIcon($node->iconClass);
     			    }

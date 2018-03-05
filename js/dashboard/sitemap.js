@@ -9,6 +9,39 @@ var DISABLED_ICON_MAP = {
     'fa fa-home': 'fa fa-h-square'
 };
 
+function refreshNodeIcon(node)
+{
+    var $icon = $(node.span).find('.fa');
+    $.each(DISABLED_ICON_MAP, function (enabledIcon, disabledIcon) {
+        if (node.data.accessibleByGuest) {
+            if ($icon.hasClass(disabledIcon)) {
+                $icon.removeClass(disabledIcon).addClass(enabledIcon);
+                return false;
+            }
+        } else {
+            if ($icon.hasClass(enabledIcon)) {
+                $icon.removeClass(enabledIcon).addClass(disabledIcon);
+                return false;
+            }
+        }
+    });
+    node.data.iconClass = $icon.attr('class');
+}
+function updateAccessibility(parentNode, accessibleByGuest)
+{
+    if (typeof parentNode.data.accessibleByGuest === 'boolean') {
+        parentNode.data.accessibleByGuest = accessibleByGuest;
+        refreshNodeIcon(parentNode);
+    }
+    if (parentNode.hasChildren()) {
+        $.each(parentNode.getChildren(), function() {
+            if (this.data.inheritPermissionsFromParent === true) {
+                updateAccessibility(this, accessibleByGuest);
+            }
+        });
+    }
+}
+
 function HookedMenu($element, $menu, data)
 {
     var me = this;
@@ -27,34 +60,14 @@ function HookedMenu($element, $menu, data)
             )
         )
     ;
-    me.accessibilityUpdated();
+    me.updateLinkText();
 }
 HookedMenu.prototype = {
-    getIcon: function() {
-        var $icon = this.$element.prev();
-        return $icon.length === 1 && $icon.hasClass('fa') ? $icon : null;
+    getTreeNode: function() {
+        return $.ui.dynatree.getNode(this.$element);
     },
-    accessibilityUpdated: function(iconToo) {
-        var me = this;
-        me.$link.text(me.data.accessibleByGuest ? window.PageDisablerSitemapData.i18n.Disable : window.PageDisablerSitemapData.i18n.Enable);
-        if (iconToo) {
-            var $icon = me.getIcon();
-            if ($icon !== null) {
-                $.each(DISABLED_ICON_MAP, function (enabledIcon, disabledIcon) {
-                    if (me.data.accessibleByGuest) {
-                        if ($icon.hasClass(disabledIcon)) {
-                            $icon.removeClass(disabledIcon).addClass(enabledIcon);
-                            return false;
-                        }
-                    } else {
-                        if ($icon.hasClass(enabledIcon)) {
-                            $icon.removeClass(enabledIcon).addClass(disabledIcon);
-                            return false;
-                        }
-                    }                    
-                });
-            }
-        }
+    updateLinkText: function() {
+        this.$link.text(this.data.accessibleByGuest ? window.PageDisablerSitemapData.i18n.Disable : window.PageDisablerSitemapData.i18n.Enable);
     },
     toggleAccessibility: function() {
         var me = this;
@@ -66,8 +79,9 @@ HookedMenu.prototype = {
                 action: me.data.accessibleByGuest ? 'disable' : 'enable'
             },
             success: function(data) {
-                me.data.accessibleByGuest = data.enabled;
-                me.accessibilityUpdated(true);
+                me.data.inheritPermissionsFromParent = false;
+                updateAccessibility(me.getTreeNode(), data.enabled);
+                me.updateLinkText();
             }
         });
     }
